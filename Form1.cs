@@ -35,10 +35,22 @@ namespace Joystick
         private void EnumerateDevices()
         {
             deviceList.Items.Clear();
-            var joysticks = directInput.GetDevices(DeviceClass.GameControl, DeviceEnumerationFlags.AttachedOnly);
-            foreach (var dev in joysticks)
+            var joysticks = directInput
+                .GetDevices(DeviceClass.GameControl, DeviceEnumerationFlags.AttachedOnly)
+                .ToList();
+
+            if (joysticks.Count == 0)
             {
-                deviceList.Items.Add(dev.InstanceName);
+                deviceList.Items.Add("Mouse");
+                deviceList.Tag = null; 
+            }
+            else
+            {
+                foreach (var dev in joysticks)
+                {
+                    deviceList.Items.Add(dev.InstanceName);
+                }
+                deviceList.Tag = joysticks;
             }
         }
 
@@ -50,12 +62,19 @@ namespace Joystick
                 return;
             }
 
-            var devices = directInput.GetDevices(DeviceClass.GameControl, DeviceEnumerationFlags.AttachedOnly).ToList();
+            var devices = deviceList.Tag as System.Collections.Generic.List<DeviceInstance>;
+
+            if (devices == null)
+            {
+                var joystickForm = new Form2(null); 
+                joystickForm.Show();
+                return;
+            }
+
             var selectedDevice = devices[deviceList.SelectedIndex];
 
-            // otwieramy nowe okno FormJoystick
-            var joystickForm = new Form2(selectedDevice);
-            joystickForm.Show();
+            var joystickForm2 = new Form2(selectedDevice);
+            joystickForm2.Show();
         }
     }
 }
